@@ -27,9 +27,20 @@ mongoose
   .connect(process.env.MONGO_URI)
   .then(() => {
     console.log('✅ Connected to MongoDB Atlas');
-    const PORT = process.env.PORT || 5000;
-    app.listen(PORT, () => {
+    const PORT = process.env.PORT || 5001;
+    const server = app.listen(PORT, () => {
       console.log(`🚀 Server running on http://localhost:${PORT}`);
+    });
+
+    server.on('error', (err) => {
+      if (err.code === 'EADDRINUSE') {
+        console.error(`❌ Port ${PORT} is already in use.`);
+        console.error(`   Run this to fix it: npx kill-port ${PORT}`);
+        console.error(`   Or change PORT in your .env file.`);
+        process.exit(1);
+      } else {
+        throw err;
+      }
     });
   })
   .catch((err) => {
